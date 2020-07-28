@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+from zipfile import ZipFile
+import json
+
+#extract esx to project directory
+with ZipFile('test.esx', 'r') as zip:
+    zip.extractall('project')
+
+
+#take floorplan ID from floorplan json
+fpList = []
+with open('project/floorPlans.json') as f:
+    floorplanJSON = json.load(f)
+    for fpParsed in floorplanJSON['floorPlans']:
+        fpList.append(fpParsed['id'])
+
+
+#define the different dictionairies
+
+#AP Name
+APN=dict()
+#AP Model
+APM=dict()
+#AP Location (MapID)
+APL=dict()
+#AP ID
+APID=dict()
+#Simulated Radio Antenna ID
+SRAT=dict()
+#Simulated Radio Transmit Power
+SRTX=dict()
+#Simulated Radio Channel
+SRCH=dict()
+#Simulated Radio Antenna Height
+SRHE=dict()
+
+
+#Read the AccessPoints JSON, and take valuable data from it into a dict
+
+with open('project/accessPoints.json') as g:
+    apJSON = json.load(g)
+    for apParsed1 in apJSON['accessPoints']:
+        APID.update({apParsed1['id'] : apParsed1['id']})
+        APN.update({apParsed1['id'] : apParsed1['name']})
+        APM.update({apParsed1['id']: apParsed1['model']})
+        APL.update({apParsed1['id']: apParsed1['location']})
+
+#Read the SimulatedRadios JSON, and take the valuable data from it into a dict
+
+with open('project/simulatedRadios.json') as h:
+    srJSON = json.load(h)
+    for srParsed1 in srJSON['simulatedRadios']:
+        SRAT.update({srParsed1['accessPointId'] : srParsed1['antennaTypeId']})
+        SRTX.update({srParsed1['accessPointId'] : srParsed1['transmitPower']})
+#broken        SRCH.update({srParsed1['accessPointId'] : srParsed1['channel']})
+        SRHE.update({srParsed1['accessPointId'] : srParsed1['antennaHeight']})
+
+#Antenna Name
+ATN=dict()
+with open('project/antennaTypes.json') as i:
+    atJSON = json.load(i)
+    for atParsed1 in atJSON['antennaTypes']:
+        ATN.update({atParsed1['id'] : atParsed1['name']})
+
+for APkey in APID.keys():
+    for ATkey in ATN.keys():
+        if APkey == ATkey:
+            print(ATkey)
