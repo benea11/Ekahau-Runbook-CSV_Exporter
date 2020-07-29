@@ -21,7 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="132d0d8b-1f23-4423-8c65-053d5541dfdc" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Eka_Runbook" beforeDir="false" afterPath="$PROJECT_DIR$/Eka_Runbook" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +65,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
     <state x="602" y="369" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1595968836469">
