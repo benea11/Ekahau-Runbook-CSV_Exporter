@@ -1,68 +1,62 @@
 #!/usr/bin/env python
 from zipfile import ZipFile
 import json
+import csv
 
 #extract esx to project directory
 with ZipFile('test.esx', 'r') as zip:
     zip.extractall('project')
 
 
-#take floorplan ID from floorplan json
-fpList = []
-with open('project/floorPlans.json') as f:
-    floorplanJSON = json.load(f)
-    for fpParsed in floorplanJSON['floorPlans']:
-        fpList.append(fpParsed['id'])
+with open('project/floorPlans.json') as j:
+    floorplanJSON = json.load(j)
 
+with open('project/accessPoints.json') as j:
+    apJSON = json.load(j)
 
-#define the different dictionairies
+with open('project/simulatedRadios.json') as j:
+    srJSON = json.load(j)
 
-#AP Name
-APN=dict()
-#AP Model
-APM=dict()
-#AP Location (MapID)
-APL=dict()
-#AP ID
-APID=dict()
-#Simulated Radio Antenna ID
-SRAT=dict()
-#Simulated Radio Transmit Power
-SRTX=dict()
-#Simulated Radio Channel
-SRCH=dict()
-#Simulated Radio Antenna Height
-SRHE=dict()
+with open('project/antennaTypes.json') as j:
+    atJSON = json.load(j)
 
+with open('project/antennaTypes.json') as j:
+    antennaTypes = json.load(j)
 
-#Read the AccessPoints JSON, and take valuable data from it into a dict
+headers = 'AP Name', 'AP Location', 'AP Vendor', 'AP Model', 'Antenna Name', 'AP Height'
+f = open('runbook.csv', 'w')
+with f:
+    writer = csv.writer(f)
+    writer.writerow(headers)
 
-with open('project/accessPoints.json') as g:
-    apJSON = json.load(g)
-    for apParsed1 in apJSON['accessPoints']:
-        APID.update({apParsed1['id'] : apParsed1['id']})
-        APN.update({apParsed1['id'] : apParsed1['name']})
-        APM.update({apParsed1['id']: apParsed1['model']})
-        APL.update({apParsed1['id']: apParsed1['location']})
-
-#Read the SimulatedRadios JSON, and take the valuable data from it into a dict
-
-with open('project/simulatedRadios.json') as h:
-    srJSON = json.load(h)
-    for srParsed1 in srJSON['simulatedRadios']:
-        SRAT.update({srParsed1['accessPointId'] : srParsed1['antennaTypeId']})
-        SRTX.update({srParsed1['accessPointId'] : srParsed1['transmitPower']})
-#broken        SRCH.update({srParsed1['accessPointId'] : srParsed1['channel']})
-        SRHE.update({srParsed1['accessPointId'] : srParsed1['antennaHeight']})
-
-#Antenna Name
-ATN=dict()
-with open('project/antennaTypes.json') as i:
-    atJSON = json.load(i)
-    for atParsed1 in atJSON['antennaTypes']:
-        ATN.update({atParsed1['id'] : atParsed1['name']})
-
-for APkey in APID.keys():
-    for ATkey in ATN.keys():
-        if APkey == ATkey:
-            print(ATkey)
+for ap in apJSON['accessPoints']:
+    ap_name = ap['name']
+    ap_vendor = ap['vendor']
+    ap_model = ap['model'].split(' +')[0]
+    if "Simulated" in ap_name:
+        ap_name = ap['name'].split(' ')[1]
+    ap_location = ap['location']
+    for fp in floorplanJSON['floorPlans']:
+        if ap_location['floorPlanId'] == fp['id']:
+            ap_loc = fp['name']
+    iap = "3802i"
+    if iap in ap['model']:
+        ant_Name = "internal"
+        for radio in srJSON['simulatedRadios']:
+            ap_height = radio['antennaHeight']
+            print(ap_height)
+    else:
+        for radio in srJSON['simulatedRadios']:
+            ap_height = radio['antennaHeight']
+            if ap['id'] == radio['accessPointId']:
+                for antenna in antennaTypes['antennaTypes']:
+                    if radio['antennaTypeId'] == antenna['id']:
+                        if antenna['frequencyBand'] == "FIVE":
+                            if antenna['apCoupling'] == "EXTERNAL_ANTENNA":
+                                ant_Name = antenna['name']
+    export = [[ap_name, ap_loc, ap_vendor, ap_model, ant_Name, ap_height]]
+    f = open('runbook.csv', 'a')
+    with f:
+        writer = csv.writer(f)
+        for row in export:
+            writer.writerow(row)

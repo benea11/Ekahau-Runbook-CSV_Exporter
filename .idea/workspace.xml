@@ -20,7 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="132d0d8b-1f23-4423-8c65-053d5541dfdc" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Eka_Runbook" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Ekahau-Runbook.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Ekahau-Runbook.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Eka_Runbook" beforeDir="false" afterPath="$PROJECT_DIR$/Eka_Runbook" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +40,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -68,5 +71,13 @@
       <screen x="0" y="0" width="1792" height="1120" />
     </state>
     <state x="602" y="369" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1792.1120@0.0.1792.1120" timestamp="1595968836469" />
+    <state x="397" y="199" key="SettingsEditor" timestamp="1595970445210">
+      <screen x="0" y="0" width="1792" height="1120" />
+    </state>
+    <state x="397" y="199" key="SettingsEditor/0.0.1792.1120@0.0.1792.1120" timestamp="1595970445210" />
+    <state x="561" y="251" width="670" height="676" key="search.everywhere.popup" timestamp="1596012823895">
+      <screen x="0" y="0" width="1792" height="1120" />
+    </state>
+    <state x="561" y="251" width="670" height="676" key="search.everywhere.popup/0.0.1792.1120@0.0.1792.1120" timestamp="1596012823895" />
   </component>
 </project>
