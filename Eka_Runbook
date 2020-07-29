@@ -49,7 +49,7 @@ def main():
         for fp in floorplanJSON['floorPlans']:
             if ap_location['floorPlanId'] == fp['id']:
                 ap_loc = fp['name']
-        iap = "3802i"
+        iap = "802i"
         if iap in ap['model']:
             ant_Name = "internal"
             for radio in srJSON['simulatedRadios']:
@@ -64,6 +64,8 @@ def main():
                             if antenna['frequencyBand'] == "FIVE":
                                 if antenna['apCoupling'] == "EXTERNAL_ANTENNA":
                                     ant_Name = antenna['name']
+                                elif antenna['apCoupling'] == "INTERNAL_ANTENNA":
+                                    ant_Name = "internal"
 
         #Assemble and append to the CSV file
         export = [[ap_name, ap_loc, ap_vendor, ap_model, ant_Name, ap_height]]
