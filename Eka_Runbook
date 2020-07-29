@@ -44,7 +44,6 @@ for ap in apJSON['accessPoints']:
         ant_Name = "internal"
         for radio in srJSON['simulatedRadios']:
             ap_height = radio['antennaHeight']
-            print(ap_height)
     else:
         for radio in srJSON['simulatedRadios']:
             ap_height = radio['antennaHeight']
