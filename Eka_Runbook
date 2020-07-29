@@ -2,60 +2,79 @@
 from zipfile import ZipFile
 import json
 import csv
+import argparse
+import shutil
 
-#extract esx to project directory
-with ZipFile('test.esx', 'r') as zip:
-    zip.extractall('project')
+def main():
+    parser = argparse.ArgumentParser(
+        description='Collect vital information from an Ekahau project file and create CSV project run book')
+    parser.add_argument('file', metavar='esx_file', help='Ekahau project file')
+    args = parser.parse_args()
 
+    #extract esx to project directory
+    with ZipFile(args.file, 'r') as zip:
+        zip.extractall('project')
 
-with open('project/floorPlans.json') as j:
-    floorplanJSON = json.load(j)
+    #Open the required JSON files
+    with open('project/floorPlans.json') as j:
+        floorplanJSON = json.load(j)
 
-with open('project/accessPoints.json') as j:
-    apJSON = json.load(j)
+    with open('project/accessPoints.json') as j:
+        apJSON = json.load(j)
 
-with open('project/simulatedRadios.json') as j:
-    srJSON = json.load(j)
+    with open('project/simulatedRadios.json') as j:
+        srJSON = json.load(j)
 
-with open('project/antennaTypes.json') as j:
-    atJSON = json.load(j)
+    with open('project/antennaTypes.json') as j:
+        atJSON = json.load(j)
 
-with open('project/antennaTypes.json') as j:
-    antennaTypes = json.load(j)
+    with open('project/antennaTypes.json') as j:
+        antennaTypes = json.load(j)
 
-headers = 'AP Name', 'AP Location', 'AP Vendor', 'AP Model', 'Antenna Name', 'AP Height', 'Patch Panel Number', 'Rack Name', 'Switch Name', 'Switch Port', 'Status'
-f = open('runbook.csv', 'w')
-with f:
-    writer = csv.writer(f)
-    writer.writerow(headers)
-
-for ap in apJSON['accessPoints']:
-    ap_name = ap['name']
-    ap_vendor = ap['vendor']
-    ap_model = ap['model'].split(' +')[0]
-    if "Simulated" in ap_name:
-        ap_name = ap['name'].split(' ')[1]
-    ap_location = ap['location']
-    for fp in floorplanJSON['floorPlans']:
-        if ap_location['floorPlanId'] == fp['id']:
-            ap_loc = fp['name']
-    iap = "3802i"
-    if iap in ap['model']:
-        ant_Name = "internal"
-        for radio in srJSON['simulatedRadios']:
-            ap_height = radio['antennaHeight']
-    else:
-        for radio in srJSON['simulatedRadios']:
-            ap_height = radio['antennaHeight']
-            if ap['id'] == radio['accessPointId']:
-                for antenna in antennaTypes['antennaTypes']:
-                    if radio['antennaTypeId'] == antenna['id']:
-                        if antenna['frequencyBand'] == "FIVE":
-                            if antenna['apCoupling'] == "EXTERNAL_ANTENNA":
-                                ant_Name = antenna['name']
-    export = [[ap_name, ap_loc, ap_vendor, ap_model, ant_Name, ap_height]]
-    f = open('runbook.csv', 'a')
+    #Define, and write the CSV header
+    headers = 'AP Name', 'AP Location', 'AP Vendor', 'AP Model', 'Antenna Name', 'AP Height', 'Patch Panel Number', 'Rack Name', 'Switch Name', 'Switch Port', 'Status'
+    f = open('runbook.csv', 'w')
     with f:
         writer = csv.writer(f)
-        for row in export:
-            writer.writerow(row)
+        writer.writerow(headers)
+
+    #Collect the different fields
+    for ap in apJSON['accessPoints']:
+        ap_name = ap['name']
+        ap_vendor = ap['vendor']
+        ap_model = ap['model'].split(' +')[0]
+        if "Simulated" in ap_name:
+            ap_name = ap['name'].split(' ')[1]
+        ap_location = ap['location']
+        for fp in floorplanJSON['floorPlans']:
+            if ap_location['floorPlanId'] == fp['id']:
+                ap_loc = fp['name']
+        iap = "3802i"
+        if iap in ap['model']:
+            ant_Name = "internal"
+            for radio in srJSON['simulatedRadios']:
+                if ap['id'] == radio['accessPointId']:
+                    ap_height = radio['antennaHeight']
+        else:
+            for radio in srJSON['simulatedRadios']:
+                ap_height = radio['antennaHeight']
+                if ap['id'] == radio['accessPointId']:
+                    for antenna in antennaTypes['antennaTypes']:
+                        if radio['antennaTypeId'] == antenna['id']:
+                            if antenna['frequencyBand'] == "FIVE":
+                                if antenna['apCoupling'] == "EXTERNAL_ANTENNA":
+                                    ant_Name = antenna['name']
+
+        #Assemble and append to the CSV file
+        export = [[ap_name, ap_loc, ap_vendor, ap_model, ant_Name, ap_height]]
+        f = open('runbook.csv', 'a')
+        with f:
+            writer = csv.writer(f)
+            for row in export:
+                _ = writer.writerow(row)
+
+    #Remove the project "extracted" directory
+    shutil.rmtree('project')
+
+if __name__ == "__main__":
+    main()
