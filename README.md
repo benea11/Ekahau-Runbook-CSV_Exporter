@@ -7,9 +7,6 @@ The file is then completed with additional details which are completed during th
 <img src="./csvexport.png">
 
 <H3>To Do:</H3>
-<ul> <li>Select project file name while executing the script</li>
-<li>Fix AP Height issue</li>
-<li>Random output fix</li>
-<li>Delete extracted archive once finished</li>
+<ul> 
   <li>Specifiy or automatically detect internal antenna AP used in file</li>
 </ul>
