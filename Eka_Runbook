@@ -23,7 +23,7 @@ with open('project/antennaTypes.json') as j:
 with open('project/antennaTypes.json') as j:
     antennaTypes = json.load(j)
 
-headers = 'AP Name', 'AP Location', 'AP Vendor', 'AP Model', 'Antenna Name', 'AP Height'
+headers = 'AP Name', 'AP Location', 'AP Vendor', 'AP Model', 'Antenna Name', 'AP Height', 'Patch Panel Number', 'Rack Name', 'Switch Name', 'Switch Port', 'Status'
 f = open('runbook.csv', 'w')
 with f:
     writer = csv.writer(f)
