@@ -7,6 +7,3 @@ The file is then completed with additional details which are completed during th
 <img src="./csvexport.png">
 
 <H3>To Do:</H3>
-<ul> 
-  <li>Specifiy or automatically detect internal antenna AP used in file</li>
-</ul>
