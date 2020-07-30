@@ -5,11 +5,13 @@ import json
 import csv
 import argparse
 import shutil
+import re
 
 def main():
     parser = argparse.ArgumentParser(
         description='Collect vital information from an Ekahau project file and create CSV project run book')
     parser.add_argument('file', metavar='esx_file', help='Ekahau project file')
+    parser.add_argument('siteID', metavar='siteID', help='Consult iTOP')
     args = parser.parse_args()
 
     #extract esx to project directory
@@ -33,7 +35,7 @@ def main():
         antennaTypes = json.load(j)
 
     #Define, and write the CSV header
-    headers = 'AP Name', 'AP Location', 'AP Vendor', 'AP Model', 'Antenna Name', 'AP Height', 'Patch Panel Number', 'Rack Name', 'Switch Name', 'Switch Port', 'Status'
+    headers = 'AP Reference', 'AP Name', 'AP Location', 'AP Vendor', 'AP Model', 'Antenna Name', 'Antenna Height', 'Antenna Tilt', 'Antenna Mounted On', 'Patch Panel Number', 'Rack Name', 'Switch Name', 'Switch IP Address', 'Switch Port', 'AP MAC Address', 'Status'
     f = open('runbook.csv', 'w')
     with f:
         writer = csv.writer(f)
@@ -44,6 +46,8 @@ def main():
         ap_name = ap['name']
         ap_vendor = ap['vendor']
         ap_model = ap['model'].split(' +')[0]
+        ap_id = re.sub("[^0-9]", "", ap_name)
+        ap_hostname = args.siteID + '-AP' + ap_id
         if "Simulated" in ap_name:
             ap_name = ap['name'].split(' ')[1]
         ap_location = ap['location']
@@ -58,6 +62,8 @@ def main():
                     ap_height = radio['antennaHeight']
         else:
             for radio in srJSON['simulatedRadios']:
+                ap_tilt = radio['antennaTilt']
+                ap_mounting = radio['antennaMounting']
                 ap_height = radio['antennaHeight']
 # Thanks François for the tip on matching antenna to ap id https://github.com/francoisverges/semfio-ekahau
                 if ap['id'] == radio['accessPointId']:
@@ -70,7 +76,7 @@ def main():
                                     ant_Name = "internal"
 
         #Assemble and append to the CSV file
-        export = [[ap_name, ap_loc, ap_vendor, ap_model, ant_Name, ap_height]]
+        export = [[ap_name, ap_hostname, ap_loc, ap_vendor, ap_model, ant_Name, ap_height, ap_tilt, ap_mounting]]
         f = open('runbook.csv', 'a')
         with f:
             writer = csv.writer(f)
