@@ -14,4 +14,5 @@ Python - discover Cisco AP mode https://dot11.guru/www/2020/07/10/how-to-discove
 Python Lists and Tuples https://dot11.guru/www/2020/08/16/python-101-lists-tuples/<br>
 Python Dictionairies https://dot11.guru/www/2020/08/19/python-101-dictionaries/<br>
 Script Library https://dot11.guru/www/script-library/<br>
-
+<br>
+Ekahau Automation Series: https://dot11.guru/www/ekahau_automation/
