@@ -52,6 +52,7 @@ def main():
     jsons['cablenotes'] = cableNotes['cableNotes']
 
     output, error = constructor(jsons)
+
     if error == True:
         print("SOMETHING WENT WRONG!")
     csvcreate(data=output)
@@ -60,8 +61,8 @@ def main():
 def csvcreate(data):
 
     headers = 'AP Name', 'Floor', 'AP Vendor', 'AP Model', 'Ethernet MAC Address', \
-              'Antenna Name', 'Antenna installed to', 'Antenna Tilt', 'Distance to IDF', 'IDF Name', \
-              'Patch Panel Number', 'Switch Name', 'Switch Port', 'Status'
+              'Antenna Name', 'Antenna Orientation', 'Antenna/AP Height', 'Antenna Tilt', 'Distance to IDF', \
+              'IDF Name', 'Patch Panel Number', 'Switch Name', 'Switch Port', 'Status'
     f = open('runbook.csv', 'w')
     with f:
         writer = csv.writer(f)
@@ -76,6 +77,7 @@ def csvcreate(data):
                    '',
                    data[i]['antennaName'],
                    data[i]['antennaOrientation'],
+                   data[i]['antennaHeight'],
                    data[i]['antennaTilt'],
                    data[i]['distancetoIDF'],
                    data[i]['IDF'],
@@ -103,58 +105,62 @@ def constructor(jsons):
     dict = {}
     for ap in jsons['ap']:
         tag_id = ""
-        try:
-            dict[ap['id']] = {}
-            dict[ap['id']]['ap name'] = ap['name']
-            dict[ap['id']]['ap vendor'] = ap['vendor']
-            dict[ap['id']]['ap model'] = ap['model'].split(' +')[0]
-            dict[ap['id']]['floorplanId'] = ap['location']['floorPlanId']
-            dict[ap['id']]['tags'] = ap['tags']
-            dict[ap['id']]['location'] = ap['location']['floorPlanId']
+        if ap['status'] == "DELETED":
+            continue
 
-            for tag in jsons['tagKeys']:
 
-                if tag['key'] == 'Rack':
-                    for ap_tags in ap['tags']:
-                        if ap_tags['tagKeyId'] == tag['id']:
-                            dict[ap['id']]['IDF'] = ap_tags['value']
+        dict[ap['id']] = {}
+        dict[ap['id']]['ap name'] = ap['name']
+        dict[ap['id']]['ap vendor'] = ap['vendor']
+        dict[ap['id']]['ap model'] = ap['model'].split(' +')[0]
+        dict[ap['id']]['floorplanId'] = ap['location']['floorPlanId']
+        dict[ap['id']]['tags'] = ap['tags']
+        dict[ap['id']]['location'] = ap['location']['floorPlanId']
+        for tag in jsons['tagKeys']:
 
-            for floor in jsons['floorPlan']:
-                if ap['location']['floorPlanId'] == floor['id']:
-                    dict[ap['id']]['floor'] = floor['name']
-                    dict[ap['id']]['mpu'] = floor['metersPerUnit']
-
-            iap = "802i"
-            if iap in ap['model']:
-                dict[ap['id']]['antenna'] = "Internal"
-
-            for radio in jsons['simradio']:
-                if radio['status'] != 'DELETED':
-                    if ap['id'] == radio['accessPointId']:
-                        if radio['accessPointIndex'] == 1:
-                            dict[ap['id']]['antennaId'] = radio['antennaTypeId']
-                            dict[ap['id']]['antennaTilt'] = radio['antennaTilt']
-                            dict[ap['id']]['antennaOrientation'] = radio['antennaMounting']
-
-            for antenna in jsons['antenna']:
-                if dict[ap['id']]['antennaId'] == antenna['id']:
-                    if antenna['apCoupling'] == "EXTERNAL_ANTENNA":
-                        dict[ap['id']]['apCoupling'] = antenna['apCoupling']
-                        dict[ap['id']]['antennaName'] = antenna['name']
-                    elif antenna['apCoupling'] == "INTERNAL_ANTENNA":
-                        dict[ap['id']]['apCoupling'] = antenna['apCoupling']
-                        dict[ap['id']]['antennaName'] = " "
-
-            for note in jsons['notes']:
-                if note['text'] == ap['name']:
-                    for cable in jsons['cablenotes']:
-                        for cable_note_id in cable['noteIds']:
-                            if cable_note_id == note['id']:
-                                length = round(calculate_cable_length(dict[ap['id']]['mpu'], cable['points']))
-                                dict[ap['id']]['distancetoIDF'] = str(length) + "m"
-                                error = False
-        except:
-            error = True
+            if tag['key'] == 'rack':
+                for ap_tags in ap['tags']:
+                    if ap_tags['tagKeyId'] == tag['id']:
+                        dict[ap['id']]['IDF'] = ap_tags['value']
+        for floor in jsons['floorPlan']:
+            if ap['location']['floorPlanId'] == floor['id']:
+                dict[ap['id']]['floor'] = floor['name']
+                dict[ap['id']]['mpu'] = floor['metersPerUnit']
+        iap = "802i"
+        if iap in ap['model']:
+            dict[ap['id']]['antenna'] = "Internal"
+        for radio in jsons['simradio']:
+            if radio['status'] != 'DELETED':
+                if ap['id'] == radio['accessPointId']:
+                    if radio['accessPointIndex'] == 1:
+                        dict[ap['id']]['antennaId'] = radio['antennaTypeId']
+                        dict[ap['id']]['antennaTilt'] = radio['antennaTilt']
+                        dict[ap['id']]['antennaHeight'] = radio['antennaHeight']
+                        if radio['antennaMounting'] == "CEILING":
+                            dict[ap['id']]['antennaOrientation'] = "Horizontal"
+                        elif radio['antennaMounting'] == "WALL":
+                            dict[ap['id']]['antennaOrientation'] = "Vertical"
+                        else:
+                            dict[ap['id']]['antennaOrientation'] = "Unknown"
+        for antenna in jsons['antenna']:
+            if dict[ap['id']]['antennaId'] == antenna['id']:
+                if antenna['apCoupling'] == "EXTERNAL_ANTENNA":
+                    dict[ap['id']]['apCoupling'] = antenna['apCoupling']
+                    dict[ap['id']]['antennaName'] = antenna['name']
+                elif antenna['apCoupling'] == "INTERNAL_ANTENNA":
+                    dict[ap['id']]['apCoupling'] = antenna['apCoupling']
+                    dict[ap['id']]['antennaName'] = " "
+        for note in jsons['notes']:
+            if note['status'] == "DELETED":
+                continue
+            if note['text'] == ap['name']:
+                for cable in jsons['cablenotes']:
+                    for cable_note_id in cable['noteIds']:
+                        if cable_note_id == note['id']:
+                            length = round(calculate_cable_length(dict[ap['id']]['mpu'], cable['points']))
+                            dict[ap['id']]['distancetoIDF'] = str(length) + "m"
+                            error = False
+        error = False
     return dict, error
 
 
